@@ -115,7 +115,7 @@ The **cache** is refreshed on every successful load.
 
 ## Language
 
-The user interface is English by default and switches to German when VS Code runs with a German display language.
+The user interface is English by default and follows VS Code's display language. It is translated into all fourteen languages VS Code ships a language pack for: Chinese (Simplified), Chinese (Traditional), Czech, French, German, Hungarian, Italian, Japanese, Korean, Polish, Portuguese (Brazil), Russian, Spanish and Turkish. This documentation exists in English and German.
 
 
 ## Development & testing

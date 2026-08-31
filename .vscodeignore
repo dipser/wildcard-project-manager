@@ -9,3 +9,7 @@ releases/**
 node_modules/**
 !node_modules/**/LICENSE*
 README.de.md
+scripts/**
+l10n/_todo.json
+l10n/glossary.md
+l10n/.i18n-state.json

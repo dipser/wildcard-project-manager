@@ -405,11 +405,14 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "mkdir -p releases && vsce package --out releases/ --no-rewrite-relative-links"
+    "package": "mkdir -p releases && vsce package --out releases/ --no-rewrite-relative-links",
+    "i18n:scan": "npm run compile && node scripts/i18n-scan.js",
+    "i18n:merge": "node scripts/i18n-merge.js"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.85.0",
+    "@vscode/l10n-dev": "^0.0.35",
     "@vscode/vsce": "^2.24.0",
     "typescript": "^5.4.0"
   },

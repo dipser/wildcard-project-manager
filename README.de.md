@@ -116,7 +116,7 @@ Es wird ein **Cache** bei jedem fehlerfreien Ladevorgang aktualisiert.
 
 ## Sprachen
 
-Die Oberfläche ist standardmäßig englisch und wechselt auf Deutsch, sobald VS Code mit deutscher Anzeigesprache läuft.
+Die Oberfläche ist standardmäßig englisch und richtet sich nach der Anzeigesprache von VS Code. Sie ist in alle vierzehn Sprachen übersetzt, für die VS Code ein Language Pack anbietet: Chinesisch (vereinfacht), Chinesisch (traditionell), Deutsch, Französisch, Italienisch, Japanisch, Koreanisch, Polnisch, Portugiesisch (Brasilien), Russisch, Spanisch, Tschechisch, Türkisch und Ungarisch. Diese Dokumentation liegt auf Englisch und Deutsch vor.
 
 
 ## Entwicklung & Testen

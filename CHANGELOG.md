@@ -1,10 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- The user interface is now translated into all fourteen languages VS Code ships a language pack for: Chinese (Simplified), Chinese (Traditional), Czech, French, German, Hungarian, Italian, Japanese, Korean, Polish, Portuguese (Brazil), Russian, Spanish and Turkish.
+- New translation workflow: `npm run i18n:scan` collects everything outstanding into `l10n/_todo.json`, `npm run i18n:merge` writes it back. Fingerprints of the English source keep manual corrections intact as long as the original is unchanged; once it changes, the string is translated afresh. The rules live in `l10n/glossary.md`.
+
 ## 1.0.2
 
-- Renamed to **Wildcard Project Manager**: repository, documentation links and the in-app messages now use `wildcard-project-manager` / "Wildcard Project Manager" consistently. Command ids and configuration keys are unchanged, so existing settings and keybindings keep working.
+- Renamed to **Wildcard Project Manager**.
 - The README now carries a VS Code Marketplace badge next to the Open VSX one.
-- On a fresh install `projects.json` is now created empty (`[]`) instead of two sample groups pointing at `myremoteserver` and `/home/user/projects`, which existed on nobody's machine.
+- On a fresh install `projects.json` is now created empty (`[]`).
 - Fixed: the `.vsix` download links in both READMEs pointed at a file name that did not exist.
 
 ## 1.0.1
