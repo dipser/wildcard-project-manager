@@ -1,0 +1,477 @@
+<title>Wildcard Project Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;500;600;700&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1ee;
+    --surface: #ffffff;
+    --surface-alt: #e3e8e2;
+    --border: #c7d0c5;
+    --text: #161a17;
+    --text-muted: #57615a;
+    --accent: #3c7d58;
+    --accent-contrast: #f4faf6;
+    --gold: #a8752a;
+    --shadow: rgba(22, 26, 23, 0.08);
+
+    --mono: 'Martian Mono', 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+    --sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10140f;
+      --surface: #181d18;
+      --surface-alt: #1f251e;
+      --border: #2c342a;
+      --text: #e8ece6;
+      --text-muted: #99a49b;
+      --accent: #6fbf8f;
+      --accent-contrast: #0c130d;
+      --gold: #d9a24e;
+      --shadow: rgba(0, 0, 0, 0.45);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #10140f;
+    --surface: #181d18;
+    --surface-alt: #1f251e;
+    --border: #2c342a;
+    --text: #e8ece6;
+    --text-muted: #99a49b;
+    --accent: #6fbf8f;
+    --accent-contrast: #0c130d;
+    --gold: #d9a24e;
+    --shadow: rgba(0, 0, 0, 0.45);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 { font-family: var(--mono); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+
+  a { color: var(--accent); }
+
+  .wrap { max-width: 74rem; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3rem); }
+
+  /* ---------- topbar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 3.5rem; }
+  .brand { display: flex; align-items: center; gap: 0.55rem; font-family: var(--mono); font-weight: 600; font-size: 0.95rem; }
+  .brand .dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+  nav.toplinks { display: flex; gap: 1.5rem; font-size: 0.85rem; }
+  nav.toplinks a { color: var(--text-muted); text-decoration: none; }
+  nav.toplinks a:hover { color: var(--text); }
+  @media (max-width: 640px) { nav.toplinks { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { padding: clamp(3rem, 8vw, 5.5rem) 0 clamp(2.5rem, 6vw, 4rem); }
+  .hero-inner {
+    display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+  @media (max-width: 920px) { .hero-inner { grid-template-columns: 1fr; } }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold); margin: 0 0 1rem;
+  }
+  .hero h1 { font-size: clamp(2.1rem, 4.6vw, 3.1rem); line-height: 1.14; font-weight: 700; }
+  .hero h1 .accent { color: var(--accent); }
+  .hero .lede { max-width: 42ch; color: var(--text-muted); font-size: 1.08rem; margin: 1.25rem 0 1.75rem; }
+
+  .hero-facts { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+  .fact {
+    font-family: var(--mono); font-size: 0.76rem; padding: 0.4rem 0.65rem;
+    border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted);
+    background: var(--surface);
+  }
+
+  /* ---------- fake vscode panel ---------- */
+  .editor-chrome {
+    background: #12140f;
+    border: 1px solid #262b22;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 20px 45px -20px var(--shadow);
+    font-family: var(--mono);
+  }
+  .editor-titlebar {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.55rem 0.8rem; background: #181c14; border-bottom: 1px solid #262b22;
+  }
+  .editor-titlebar span.tf { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #3a4032; }
+  .editor-body { display: grid; grid-template-columns: 1fr; }
+  .sidebar-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6rem 0.85rem; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: #7c8a72; border-bottom: 1px solid #21261c;
+  }
+  .sidebar-head .icons { display: flex; gap: 0.4rem; opacity: 0.6; }
+  .glob-row {
+    padding: 0.7rem 0.85rem; border-bottom: 1px solid #21261c;
+    font-size: 0.82rem; color: #9fb096; display: flex; gap: 0.4rem; align-items: baseline;
+  }
+  .glob-row .lbl { color: #5c6a54; }
+  .glob-type {
+    display: inline-block; overflow: hidden; white-space: nowrap;
+    border-right: 2px solid #d9a24e;
+    width: 0;
+    animation: typeGlob 2.6s steps(28, end) 0.4s forwards, caretBlink 0.8s step-end infinite;
+  }
+  .glob-type .star { color: #d9a24e; }
+  @keyframes typeGlob { to { width: 28ch; } }
+  @keyframes caretBlink { 50% { border-color: transparent; } }
+
+  .tree { padding: 0.4rem 0 0.9rem; }
+  .tree-group {
+    padding: 0.45rem 0.85rem; font-size: 0.82rem; color: #cfd8c8;
+    display: flex; align-items: center; gap: 0.45rem; font-weight: 600;
+  }
+  .chev { color: #6f7d66; font-size: 0.7rem; }
+  .tree-item {
+    padding: 0.4rem 0.85rem 0.4rem 1.9rem; font-size: 0.82rem; color: #a7b39d;
+    display: flex; align-items: center; gap: 0.55rem; position: relative;
+    opacity: 0; transform: translateY(-2px);
+    animation: rowIn 0.45s ease forwards;
+    border-left: 1px solid transparent;
+  }
+  .tree-item::before {
+    content: ""; position: absolute; left: 1.15rem; top: 0; bottom: 0; width: 1px; background: #262b22;
+  }
+  .tree-item .glyph { width: 14px; text-align: center; color: #7c8a72; flex-shrink: 0; }
+  .tree-item .name { flex: 1; }
+  .tree-item .badge { color: #62b884; font-size: 0.78rem; opacity: 0; }
+  .tree-item.current { color: #7fd7a1; }
+  .tree-item.current .glyph { color: #7fd7a1; }
+  .tree-item.current .badge { opacity: 1; animation: badgeIn 0.4s ease 2.35s backwards; }
+  .tree-item:nth-of-type(1) { animation-delay: 3.05s; }
+  .tree-item:nth-of-type(2) { animation-delay: 3.2s; }
+  .tree-item:nth-of-type(3) { animation-delay: 3.35s; }
+  .tree-item:nth-of-type(4) { animation-delay: 3.5s; }
+  .tree-item:nth-of-type(5) { animation-delay: 3.65s; }
+  @keyframes rowIn { to { opacity: 1; transform: translateY(0); } }
+  @keyframes badgeIn { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glob-type { width: 28ch; animation: none; border-right-color: transparent; }
+    .tree-item { opacity: 1; transform: none; animation: none; }
+    .tree-item.current .badge { opacity: 1; animation: none; }
+  }
+
+  /* ---------- generic sections ---------- */
+  section.block { padding: clamp(2.75rem, 6vw, 4.5rem) 0; border-top: 1px solid var(--border); }
+  section.block h2 { font-size: clamp(1.5rem, 3vw, 1.9rem); margin-bottom: 1rem; }
+  section.block > .wrap > p.intro { color: var(--text-muted); max-width: 58ch; margin: 0 0 2rem; }
+
+  .problem-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(1.5rem, 4vw, 3rem); }
+  @media (max-width: 780px) { .problem-grid { grid-template-columns: 1fr; } }
+  .problem-grid h3 { font-size: 1rem; margin-bottom: 0.6rem; }
+  .problem-grid p { color: var(--text-muted); margin: 0; }
+  .problem-grid .old h3 { color: var(--text-muted); }
+  .problem-grid .new h3 { color: var(--accent); }
+
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.75rem; }
+  @media (max-width: 780px) { .steps { grid-template-columns: 1fr; } }
+  .steps li { counter-increment: step; padding-left: 2.6rem; position: relative; }
+  .steps li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute; left: 0; top: 0.05rem;
+    font-family: var(--mono); font-size: 0.85rem; color: var(--accent);
+  }
+  .steps h3 { font-size: 0.98rem; margin-bottom: 0.4rem; font-family: var(--sans); font-weight: 600; }
+  .steps p { color: var(--text-muted); margin: 0; font-size: 0.95rem; }
+
+  /* ---------- config code panel (always dark, editor-style, theme independent) ---------- */
+  .config-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 2.25rem; align-items: start; }
+  @media (max-width: 860px) { .config-grid { grid-template-columns: 1fr; } }
+
+  .code-panel {
+    background: #12140f; border: 1px solid #262b22; border-radius: 6px;
+    padding: 1.1rem 0 1.1rem 0; margin: 0; overflow-x: auto;
+    font-family: var(--mono); font-size: 0.82rem; line-height: 1.65; color: #cfd8c8;
+  }
+  .code-panel code { display: block; }
+  .code-panel .ln {
+    display: inline-block; width: 2.3rem; text-align: right; margin-right: 1rem;
+    color: #4a5443; user-select: none;
+  }
+  .code-panel .row { display: block; padding: 0 1.1rem; white-space: pre; }
+  .code-panel .row.hl { background: color-mix(in srgb, #6fbf8f 10%, transparent); }
+  .tok-key { color: #e2b25c; }
+  .tok-str { color: #7fd7a1; }
+  .tok-punc { color: #5c6a54; }
+  .tok-com { color: #5c6a54; font-style: italic; }
+
+  dl.annotations { margin: 0; display: grid; gap: 1.15rem; }
+  dl.annotations div { border-left: 2px solid var(--border); padding-left: 0.9rem; }
+  dl.annotations dt { font-family: var(--mono); font-size: 0.88rem; margin-bottom: 0.3rem; }
+  dl.annotations dt.k-name { color: #b98a34; }
+  dl.annotations dt.k-paths { color: var(--accent); }
+  dl.annotations dt.k-hidden { color: var(--accent); }
+  dl.annotations dt.k-order { color: #b98a34; }
+  dl.annotations dt.k-collapsed { color: #b98a34; }
+  dl.annotations dt.k-settings { color: var(--accent); }
+  dl.annotations dd { margin: 0; color: var(--text-muted); font-size: 0.92rem; }
+
+  /* ---------- icon compare ---------- */
+  .icon-compare { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  @media (max-width: 680px) { .icon-compare { grid-template-columns: 1fr; } }
+  .icon-row {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
+    padding: 0.9rem 1.1rem; font-family: var(--mono); font-size: 0.9rem;
+  }
+  .icon-row svg { flex-shrink: 0; color: var(--text-muted); }
+  .icon-row .tag { margin-left: auto; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* ---------- highlight demo ---------- */
+  .compare-panels { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  @media (max-width: 780px) { .compare-panels { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+  }
+  .panel h4 {
+    margin: 0; padding: 0.7rem 1rem; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); border-bottom: 1px solid var(--border); font-family: var(--mono); font-weight: 500;
+  }
+  .panel .row2 {
+    padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.88rem;
+    display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  }
+  .panel .row2:last-child { border-bottom: none; }
+  .panel.flat .row2 .glyph { color: var(--text-muted); }
+  .panel.marked .row2.active { color: var(--accent); }
+  .panel.marked .row2.active .glyph { color: var(--accent); }
+  .panel .check { margin-left: auto; opacity: 0; }
+  .panel.marked .row2.active .check { opacity: 1; }
+
+  /* ---------- install ---------- */
+  .terminal {
+    background: #101410; border: 1px solid #262b22; border-radius: 6px;
+    padding: 1.1rem 1.2rem; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9;
+    color: #cfd8c8; overflow-x: auto;
+  }
+  .terminal .prompt { color: #6f7d66; }
+  .terminal .out { color: #7c8a72; }
+
+  footer { border-top: 1px solid var(--border); padding: 2rem 0 3rem; }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; font-size: 0.85rem; color: var(--text-muted); }
+  footer .wrap span.mono { font-family: var(--mono); }
+</style>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span> wildcard-project-manager</div>
+    <nav class="toplinks">
+      <a href="#warum">Why</a>
+      <a href="#funktion">How it works</a>
+      <a href="#konfiguration">Configuration</a>
+      <a href="#installation">Installation</a>
+      <a href="index.de.html">Deutsch</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">VS Code Extension</p>
+        <h1>One checkmark instead of <span class="accent">forty favorites</span>.</h1>
+        <p class="lede">Wildcard Project Manager manages projects through path patterns instead of individual entries. A glob path like <code>/var/www/*</code> is all it takes – every subdirectory becomes a project automatically, locally and over SSH.</p>
+        <div class="hero-facts">
+          <span class="fact">Glob paths instead of manual upkeep</span>
+          <span class="fact">Local and remote side by side</span>
+          <span class="fact">Current project marked in green</span>
+          <span class="fact">Cache when the connection drops</span>
+        </div>
+      </div>
+
+      <div class="editor-chrome" role="img" aria-label="VS Code sidebar showing a group “Server 1” that lists three project directories automatically from a glob path, with the currently open directory marked green with a checkmark.">
+        <div class="editor-titlebar"><span class="tf"></span><span class="tf"></span><span class="tf"></span></div>
+        <div class="editor-body">
+          <div class="sidebar-head">Wildcard Project Manager <span class="icons">⟳ ⚙</span></div>
+          <div class="glob-row"><span class="lbl">paths:</span> <span class="glob-type">"/var/www/<span class="star">*</span>"</span></div>
+          <div class="tree">
+            <div class="tree-group"><span class="chev">▾</span> Server 1</div>
+            <div class="tree-item"><span class="glyph">▸</span><span class="name">api-test</span></div>
+            <div class="tree-item current"><span class="glyph">▸</span><span class="name">example.de</span><span class="badge">✓</span></div>
+            <div class="tree-item"><span class="glyph">▸</span><span class="name">my-project</span></div>
+            <div class="tree-item"><span class="glyph">▸</span><span class="name">my-project-2</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="warum">
+    <div class="wrap">
+      <h2>Maintaining favorites does not scale</h2>
+      <div class="problem-grid">
+        <div class="old">
+          <h3>Favorites maintained one by one</h3>
+          <p>Every server directory is added to the favorites one at a time by right-click. When a colleague creates a new directory under <code>/var/www/</code>, it only shows up once somebody enters it by hand.</p>
+        </div>
+        <div class="new">
+          <h3>Wildcard Project Manager</h3>
+          <p>One path pattern per server is enough. New directories under <code>/var/www/*</code> appear automatically the next time the sidebar opens – without anyone touching the configuration.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="funktion">
+    <div class="wrap">
+      <h2>How it works</h2>
+      <p class="intro">Three fields per group: a name, a list of paths, done.</p>
+      <ol class="steps">
+        <li>
+          <h3>Create a group</h3>
+          <p>One entry in the configuration, e.g. “Server 1” – shown as a category in the sidebar.</p>
+        </li>
+        <li>
+          <h3>Add a glob path</h3>
+          <p>A path like <code>vscode-remote://ssh-remote+myremoteserver/var/www/*</code> is scanned as a directory.</p>
+        </li>
+        <li>
+          <h3>Directories appear automatically</h3>
+          <p>Every subdirectory found becomes a clickable project. <code>hidden</code> excludes individual names.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="konfiguration">
+    <div class="wrap">
+      <h2>The configuration</h2>
+      <p class="intro">One editable JSON file, an array of groups. No UI form, no settings-sync noise.</p>
+      <div class="config-grid">
+        <pre class="code-panel"><code
+><span class="row"><span class="ln">1</span><span class="tok-punc">[</span></span
+><span class="row hl"><span class="ln">2</span>  <span class="tok-punc">{</span></span
+><span class="row hl"><span class="ln">3</span>    <span class="tok-key">"name"</span><span class="tok-punc">:</span> <span class="tok-str">"Server 1"</span><span class="tok-punc">,</span></span
+><span class="row hl"><span class="ln">4</span>    <span class="tok-key">"paths"</span><span class="tok-punc">:</span> <span class="tok-punc">[</span><span class="tok-str">"vscode-remote://ssh-remote+myremoteserver/var/www/*"</span><span class="tok-punc">],</span></span
+><span class="row hl"><span class="ln">5</span>    <span class="tok-key">"hidden"</span><span class="tok-punc">:</span> <span class="tok-punc">[],</span></span
+><span class="row hl"><span class="ln">6</span>    <span class="tok-key">"order"</span><span class="tok-punc">:</span> 1</span
+><span class="row hl"><span class="ln">7</span>  <span class="tok-punc">},</span></span
+><span class="row"><span class="ln">8</span>  <span class="tok-punc">{</span></span
+><span class="row"><span class="ln">9</span>    <span class="tok-key">"name"</span><span class="tok-punc">:</span> <span class="tok-str">"Local"</span><span class="tok-punc">,</span></span
+><span class="row"><span class="ln">10</span>    <span class="tok-key">"paths"</span><span class="tok-punc">:</span> <span class="tok-punc">[</span><span class="tok-str">"file:///home/user/projects/*"</span><span class="tok-punc">],</span></span
+><span class="row"><span class="ln">11</span>    <span class="tok-key">"hidden"</span><span class="tok-punc">:</span> <span class="tok-punc">[</span><span class="tok-str">"node_modules"</span><span class="tok-punc">],</span></span
+><span class="row"><span class="ln">12</span>    <span class="tok-key">"order"</span><span class="tok-punc">:</span> 2<span class="tok-punc">,</span></span
+><span class="row"><span class="ln">13</span>    <span class="tok-key">"collapsed"</span><span class="tok-punc">:</span> true<span class="tok-punc">,</span></span
+><span class="row"><span class="ln">14</span>    <span class="tok-key">"settings"</span><span class="tok-punc">:</span> <span class="tok-punc">{</span></span
+><span class="row"><span class="ln">15</span>      <span class="tok-key">"shop"</span><span class="tok-punc">:</span> <span class="tok-punc">{</span> <span class="tok-key">"icon-image"</span><span class="tok-punc">:</span> <span class="tok-str">"rocket"</span><span class="tok-punc">,</span> <span class="tok-key">"icon-color"</span><span class="tok-punc">:</span> <span class="tok-str">"charts.red"</span> <span class="tok-punc">}</span></span
+><span class="row"><span class="ln">16</span>    <span class="tok-punc">}</span></span
+><span class="row"><span class="ln">17</span>  <span class="tok-punc">}</span></span
+><span class="row"><span class="ln">18</span><span class="tok-punc">]</span></span
+></code></pre>
+        <dl class="annotations">
+          <div>
+            <dt class="k-name">name</dt>
+            <dd>Display name of the group (category) in the sidebar.</dd>
+          </div>
+          <div>
+            <dt class="k-paths">paths</dt>
+            <dd>List of URIs. If a path ends in <code>*</code>, every matching subdirectory is listed as a project. Without a wildcard the path itself counts as one project.</dd>
+          </div>
+          <div>
+            <dt class="k-hidden">hidden</dt>
+            <dd>Directory names (<code>*</code>/<code>?</code> allowed) excluded from the scan result.</dd>
+          </div>
+          <div>
+            <dt class="k-order">order</dt>
+            <dd>Sort order of the groups, ascending. Rewritten when reordering by drag &amp; drop.</dd>
+          </div>
+          <div>
+            <dt class="k-collapsed">collapsed</dt>
+            <dd>Group starts collapsed. With an active search it expands anyway so the matches stay visible.</dd>
+          </div>
+          <div>
+            <dt class="k-settings">settings</dt>
+            <dd>Icon and color per project: <code>icon-image</code> is a codicon ID, <code>icon-color</code> a theme color ID. Set by right-click, not by hand.</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2>Local and remote at a glance</h2>
+      <p class="intro">So you do not have to read the tooltip first, the icons differ depending on where the path comes from.</p>
+      <div class="icon-compare">
+        <div class="icon-row">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 3.5C1.5 2.94772 1.94772 2.5 2.5 2.5H6.5L7.8 3.8C7.99464 3.99464 8.25735 4.10396 8.53137 4.10396H13.5C14.0523 4.10396 14.5 4.55167 14.5 5.10396V12.5C14.5 13.0523 14.0523 13.5 13.5 13.5H2.5C1.94772 13.5 1.5 13.0523 1.5 12.5V3.5Z" stroke="currentColor" stroke-width="1.2"/></svg>
+          <span>my-project</span>
+          <span class="tag">file://</span>
+        </div>
+        <div class="icon-row">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 4.5V8L10.2 9.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <span>api-test</span>
+          <span class="tag">ssh-remote</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2>You always know where you are</h2>
+      <p class="intro">The project you currently have open is marked not just in bold but in green with a checkmark – easy to spot among dozens of similarly named directories.</p>
+      <div class="compare-panels">
+        <div class="panel flat">
+          <h4>Without marking</h4>
+          <div class="row2"><span class="glyph">▸</span> api-test</div>
+          <div class="row2"><span class="glyph">▸</span> example.de</div>
+          <div class="row2"><span class="glyph">▸</span> my-project</div>
+        </div>
+        <div class="panel marked">
+          <h4>With Wildcard Project Manager</h4>
+          <div class="row2"><span class="glyph">▸</span> api-test</div>
+          <div class="row2 active"><span class="glyph">▸</span> example.de <span class="check">✓</span></div>
+          <div class="row2"><span class="glyph">▸</span> my-project</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="installation">
+    <div class="wrap">
+      <h2>Installation</h2>
+      <p class="intro">Available on the <a href="https://open-vsx.org/extension/dipser/wildcard-project-manager">Open VSX Marketplace</a> – installable directly in VSCodium, Cursor and Windsurf. For VS Code the built <code>.vsix</code> lives in <a href="https://github.com/dipser/wildcard-project-manager/tree/develop/releases">releases/</a> – download, install, reload the window.</p>
+      <pre class="terminal"><span class="prompt">$</span> code --install-extension wildcard-project-manager-1.0.2.vsix
+<span class="out">→ Extension installed · then “Developer: Reload Window”</span></pre>
+      <p class="intro">Or build it yourself:</p>
+      <pre class="terminal"><span class="prompt">$</span> npm install
+<span class="prompt">$</span> npm run compile
+<span class="prompt">$</span> npm run package
+<span class="out">→ releases/wildcard-project-manager-1.0.2.vsix</span></pre>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Wildcard Project Manager · MIT license</span>
+    <span class="mono"><a href="https://github.com/dipser/wildcard-project-manager">v1.0.2</a></span>
+  </div>
+</footer>

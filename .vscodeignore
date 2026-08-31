@@ -1,0 +1,11 @@
+.vscode/**
+src/**
+.gitignore
+tsconfig.json
+promo/**
+!promo/example.png
+releases/**
+**/*.map
+node_modules/**
+!node_modules/**/LICENSE*
+README.de.md

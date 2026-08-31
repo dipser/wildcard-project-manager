@@ -1,0 +1,33 @@
+[
+  {
+    "name": "Webserver",
+    "paths": [
+      "vscode-remote://ssh-remote+myremoteserver/var/www/shop-frontend",
+      "vscode-remote://ssh-remote+myremoteserver/var/www/kundenportal",
+      "vscode-remote://ssh-remote+myremoteserver/var/www/api-gateway",
+      "vscode-remote://ssh-remote+myremoteserver/var/www/landingpage"
+    ],
+    "hidden": [],
+    "order": -2,
+    "settings": {
+      "shop-frontend": { "icon-image": "rocket", "icon-color": "charts.red" },
+      "kundenportal": { "icon-image": "organization", "icon-color": "charts.blue" },
+      "api-gateway": { "icon-image": "server-process", "icon-color": "charts.purple" },
+      "landingpage": { "icon-image": "globe", "icon-color": "charts.yellow" }
+    }
+  },
+  {
+    "name": "Lokal",
+    "paths": [
+      "file:///home/user/projects/website-relaunch",
+      "file:///home/user/projects/intranet",
+      "file:///home/user/projects/toolbox"
+    ],
+    "hidden": [],
+    "order": -1,
+    "settings": {
+      "website-relaunch": { "icon-image": "browser", "icon-color": "charts.green" },
+      "toolbox": { "icon-image": "tools", "icon-color": "charts.orange" }
+    }
+  }
+]

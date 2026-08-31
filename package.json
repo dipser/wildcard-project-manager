@@ -1,0 +1,417 @@
+{
+  "name": "wildcard-project-manager",
+  "displayName": "Wildcard Project Manager",
+  "description": "%extension.description%",
+  "version": "1.0.2",
+  "publisher": "dipser",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dipser/wildcard-project-manager.git"
+  },
+  "homepage": "https://github.com/dipser/wildcard-project-manager#readme",
+  "bugs": {
+    "url": "https://github.com/dipser/wildcard-project-manager/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "extensionKind": [
+    "ui"
+  ],
+  "keywords": [
+    "project manager",
+    "remote",
+    "ssh",
+    "workspace",
+    "glob"
+  ],
+  "activationEvents": [
+    "onView:pathProjectManagerView",
+    "onCommand:pathProjectManager.openConfig",
+    "onCommand:pathProjectManager.refresh"
+  ],
+  "icon": "icons/marketplace-icon.png",
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pathProjectManager",
+          "title": "Wildcard Project Manager",
+          "icon": "icons/activity-bar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "pathProjectManager": [
+        {
+          "id": "pathProjectManagerView",
+          "name": "Wildcard Project Manager"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "pathProjectManager.refresh",
+        "title": "%command.refresh%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "pathProjectManager.openConfig",
+        "title": "%command.openConfig%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "pathProjectManager.addCurrentFolder",
+        "title": "%command.addCurrentFolder%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(save)"
+      },
+      {
+        "command": "pathProjectManager.openInCurrentWindow",
+        "title": "%command.openInCurrentWindow%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.openInNewWindow",
+        "title": "%command.openInNewWindow%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(empty-window)"
+      },
+      {
+        "command": "pathProjectManager.hideProject",
+        "title": "%command.hideProject%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "pathProjectManager.unhideProject",
+        "title": "%command.unhideProject%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "pathProjectManager.showHidden",
+        "title": "%command.showHidden%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "pathProjectManager.hideHidden",
+        "title": "%command.hideHidden%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "pathProjectManager.find",
+        "title": "%command.find%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(search)"
+      },
+      {
+        "command": "pathProjectManager.clearFilter",
+        "title": "%command.clearFilter%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "pathProjectManager.customizeIcon",
+        "title": "%command.customizeIcon%",
+        "category": "Wildcard Project Manager",
+        "icon": "$(symbol-color)"
+      },
+      {
+        "command": "pathProjectManager.resetIcon",
+        "title": "%command.resetIcon%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.collapseGroupByDefault",
+        "title": "%command.collapseGroupByDefault%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.expandGroupByDefault",
+        "title": "%command.expandGroupByDefault%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorNone",
+        "title": "%command.setColorNone%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorDimmed",
+        "title": "%command.setColorDimmed%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorRed",
+        "title": "%command.setColorRed%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorOrange",
+        "title": "%command.setColorOrange%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorYellow",
+        "title": "%command.setColorYellow%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorGreen",
+        "title": "%command.setColorGreen%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorBlue",
+        "title": "%command.setColorBlue%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorPurple",
+        "title": "%command.setColorPurple%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorGray",
+        "title": "%command.setColorGray%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorMore",
+        "title": "%command.setColorMore%",
+        "category": "Wildcard Project Manager"
+      },
+      {
+        "command": "pathProjectManager.setColorCustom",
+        "title": "%command.setColorCustom%",
+        "category": "Wildcard Project Manager"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "pathProjectManager.find",
+          "when": "view == pathProjectManagerView && !pathProjectManager.filterActive",
+          "group": "navigation@1"
+        },
+        {
+          "command": "pathProjectManager.clearFilter",
+          "when": "view == pathProjectManagerView && pathProjectManager.filterActive",
+          "group": "navigation@1"
+        },
+        {
+          "command": "pathProjectManager.refresh",
+          "when": "view == pathProjectManagerView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "pathProjectManager.addCurrentFolder",
+          "when": "view == pathProjectManagerView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "pathProjectManager.openConfig",
+          "when": "view == pathProjectManagerView",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "pathProjectManager.openInNewWindow",
+          "when": "view == pathProjectManagerView && viewItem =~ /^project/",
+          "group": "inline@1"
+        },
+        {
+          "command": "pathProjectManager.showHidden",
+          "when": "view == pathProjectManagerView && viewItem =~ /^group-.*-hiddenHidden$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "pathProjectManager.hideHidden",
+          "when": "view == pathProjectManagerView && viewItem =~ /^group-.*-hiddenShown$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "pathProjectManager.hideProject",
+          "when": "view == pathProjectManagerView && viewItem == project",
+          "group": "1_modification@1"
+        },
+        {
+          "command": "pathProjectManager.unhideProject",
+          "when": "view == pathProjectManagerView && viewItem == projectHidden",
+          "group": "1_modification@1"
+        },
+        {
+          "command": "pathProjectManager.showHidden",
+          "when": "view == pathProjectManagerView && viewItem =~ /^group-.*-hiddenHidden$/",
+          "group": "1_modification@1"
+        },
+        {
+          "command": "pathProjectManager.hideHidden",
+          "when": "view == pathProjectManagerView && viewItem =~ /^group-.*-hiddenShown$/",
+          "group": "1_modification@1"
+        },
+        {
+          "command": "pathProjectManager.collapseGroupByDefault",
+          "when": "view == pathProjectManagerView && viewItem =~ /^group-expanded-/",
+          "group": "7_modification@1"
+        },
+        {
+          "command": "pathProjectManager.expandGroupByDefault",
+          "when": "view == pathProjectManagerView && viewItem =~ /^group-collapsed-/",
+          "group": "7_modification@1"
+        },
+        {
+          "submenu": "pathProjectManager.iconMenu",
+          "when": "view == pathProjectManagerView && viewItem =~ /^project/",
+          "group": "7_modification@1"
+        }
+      ],
+      "pathProjectManager.iconMenu": [
+        {
+          "submenu": "pathProjectManager.colorMenu",
+          "group": "1_icon@1"
+        },
+        {
+          "command": "pathProjectManager.customizeIcon",
+          "group": "1_icon@2"
+        },
+        {
+          "command": "pathProjectManager.resetIcon",
+          "group": "9_reset@1"
+        }
+      ],
+      "pathProjectManager.colorMenu": [
+        {
+          "command": "pathProjectManager.setColorNone",
+          "group": "0_none@1"
+        },
+        {
+          "command": "pathProjectManager.setColorDimmed",
+          "group": "1_dimmed@1"
+        },
+        {
+          "command": "pathProjectManager.setColorRed",
+          "group": "2_colors@1"
+        },
+        {
+          "command": "pathProjectManager.setColorOrange",
+          "group": "2_colors@2"
+        },
+        {
+          "command": "pathProjectManager.setColorYellow",
+          "group": "2_colors@3"
+        },
+        {
+          "command": "pathProjectManager.setColorGreen",
+          "group": "2_colors@4"
+        },
+        {
+          "command": "pathProjectManager.setColorBlue",
+          "group": "2_colors@5"
+        },
+        {
+          "command": "pathProjectManager.setColorPurple",
+          "group": "2_colors@6"
+        },
+        {
+          "command": "pathProjectManager.setColorGray",
+          "group": "2_colors@7"
+        },
+        {
+          "command": "pathProjectManager.setColorMore",
+          "group": "3_more@1"
+        },
+        {
+          "command": "pathProjectManager.setColorCustom",
+          "group": "3_more@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "pathProjectManager.setColorNone",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorDimmed",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorRed",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorOrange",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorYellow",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorGreen",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorBlue",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorPurple",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorGray",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorMore",
+          "when": "false"
+        },
+        {
+          "command": "pathProjectManager.setColorCustom",
+          "when": "false"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "pathProjectManager.iconMenu",
+        "label": "%submenu.icon%"
+      },
+      {
+        "id": "pathProjectManager.colorMenu",
+        "label": "%submenu.color%"
+      }
+    ],
+    "viewsWelcome": [
+      {
+        "view": "pathProjectManagerView",
+        "contents": "%viewsWelcome.empty%"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "mkdir -p releases && vsce package --out releases/ --no-rewrite-relative-links"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "typescript": "^5.4.0"
+  },
+  "l10n": "./l10n"
+}
