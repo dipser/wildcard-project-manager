@@ -46,7 +46,7 @@ In VSCode drücke `Strg`+`Shift`+`P` und wähle "`Extensions: Install from VSIX.
 [
   {
     "name": "Remote Server",
-    "paths": ["vscode-remote://ssh-remote+externalserver/var/www/*/*"],
+    "paths": ["vscode-remote://ssh-remote+externalserver/var/www/*"],
     "hidden": [],
     "order": 1
   },
