@@ -32,7 +32,7 @@ Manage **paths with wildcards**. Handy when a single path holds several projects
 
 ## Installation
 
-Current version: **[wildcard-project-manager-1.0.2.vsix](https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/releases/wildcard-project-manager-1.0.2.vsix)**<br>
+Current version: **[wildcard-project-manager-1.0.3.vsix](https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/releases/wildcard-project-manager-1.0.3.vsix)**<br>
 For older versions see [`releases/`](https://github.com/dipser/wildcard-project-manager/tree/develop/releases)
 
 In VS Code press `Ctrl`+`Shift`+`P` and choose "`Extensions: Install from VSIX...`". Then press `Ctrl`+`Shift`+`P` again and choose "`Developer: Reload Window`".
@@ -40,7 +40,7 @@ In VS Code press `Ctrl`+`Shift`+`P` and choose "`Extensions: Install from VSIX..
 
 ## How it works
 
-Instead of listing individual projects you define **groups**. Each group has a name and a list of paths. A path ending in `*` is scanned as a directory – every subdirectory found becomes a project in the list automatically.
+Instead of listing individual projects you define **groups**. Each group has a name and a list of paths. A path ending in `*` is scanned as a directory – every subdirectory found becomes a project in the list automatically. Wildcards may appear in any segment: `/var/www/*/*` walks two levels and files the matches under one expandable node per parent directory.
 
 ### JSON configuration `projects.json`
 
@@ -68,11 +68,11 @@ Instead of listing individual projects you define **groups**. Each group has a n
 | Field | Description |
 |---|---|
 | `name` | Group name in the sidebar |
-| `paths` | List of URIs or plain paths. If a path ends in `*` (or contains `*`/`?` in its last segment), every matching subdirectory is listed as a project. Without a wildcard the path itself becomes a single project. |
-| `hidden` | Optional. Directory names (`*`/`?` allowed) to exclude from the scan result |
+| `paths` | List of URIs or plain paths. A `*` may appear in any segment; every matching subdirectory is listed as a project. Without a wildcard the path itself becomes a single project. |
+| `hidden` | Optional. Directory names (`*` allowed) to exclude from the scan result. With multi-level patterns an entry may name **any level**: `domain.com` hides that whole expandable node, `domain.com/logs` a single entry, and the bare `logs` every folder of that name under any domain. |
 | `order` | Optional. Can also be reordered by drag & drop. |
 | `collapsed` | Optional. Group starts expanded or collapsed. |
-| `settings` | Optional. Settings per directory name (`*`/`?` allowed): `icon-image` = [codicon ID](https://microsoft.github.io/vscode-codicons/dist/codicon.html), `icon-color` = [theme color ID](https://code.visualstudio.com/api/references/theme-color). |
+| `settings` | Optional. Settings per directory name (`*` allowed): `icon-image` = [codicon ID](https://microsoft.github.io/vscode-codicons/dist/codicon.html), `icon-color` = [theme color ID](https://code.visualstudio.com/api/references/theme-color). |
 
 ### Local and remote path formats
 
@@ -85,10 +85,31 @@ Instead of listing individual projects you define **groups**. Each group has a n
 
 ### Wildcards
 
-Wildcards are evaluated within **one** directory only.
+`*` matches any number of characters and is the only wildcard. A `*` always stays within **one** directory – it never skips a level. In exchange every segment of a path may carry a wildcard, and the path is then walked level by level.
 
-- `*` matches any number of characters
-- `?` matches exactly one character
+#### Several levels
+
+Typical for Plesk servers, where each domain holds its subdomains:
+
+```json
+{ "name": "Server", "paths": ["/var/www/*/*"], "hidden": ["logs", "conf", "httpdocs", ".*"] }
+```
+
+```
+▾ Server
+  ▾ domain1.com
+      sub1.domain1.com
+      sub2.domain1.com
+  ▸ domain2.com
+```
+
+Every wildcard level except the last becomes an **expandable node**. Clicking it only expands and collapses; the directory itself opens from the context menu or the `Open in New Window` button. Expandable nodes start collapsed, after which VS Code remembers their state.
+
+The full project name is composed of every level **from the first wildcard onwards** (`domain1.com/sub1.domain1.com`) – the fixed prefix before it is not part of the name, and the tree shows only the last level anyway. That full name is the key for `hidden` and `settings`, so it stays unambiguous even when two domains share a subdirectory name.
+
+Right-clicking an expandable node offers `Hide Project` just like a project does; the entry written to `hidden` is then the node's own path (`domain2.com`), which hides everything below it. While hidden entries are shown, such a node appears greyed out and can be brought back from its context menu.
+
+Fixed segments after a wildcard work too: `/var/www/*/httpdocs` finds the document root of every domain. Subdirectories that cannot be read – on Plesk quite a few belong to root – are skipped and counted as a note at the end of the group; the remaining domains are unaffected.
 
 ### Cache `projects-cache.json`
 
@@ -126,7 +147,7 @@ The user interface is English by default and follows VS Code's display language.
 npm install
 npm run compile
 npm run package   # writes the .vsix into releases/
-code --install-extension releases/wildcard-project-manager-1.0.2.vsix
+code --install-extension releases/wildcard-project-manager-1.0.3.vsix
 ```
 
 

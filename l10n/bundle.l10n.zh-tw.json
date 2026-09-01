@@ -1,4 +1,5 @@
 {
+  "{0} subfolders could not be read and were skipped.": "{0} 個子資料夾無法讀取，已略過。",
   "$(add) New group…": "$(add) 新增群組…",
   "Add to which group?": "要加入哪個群組？",
   "Blue": "藍色",

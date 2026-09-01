@@ -1,4 +1,5 @@
 {
+  "{0} subfolders could not be read and were skipped.": "No se pudieron leer {0} subcarpetas y se omitieron.",
   "$(add) New group…": "$(add) Nuevo grupo…",
   "Add to which group?": "¿A qué grupo se debe agregar?",
   "Blue": "Azul",

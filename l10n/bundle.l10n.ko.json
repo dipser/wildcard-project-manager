@@ -1,4 +1,5 @@
 {
+  "{0} subfolders could not be read and were skipped.": "하위 폴더 {0}개를 읽을 수 없어 건너뛰었습니다.",
   "$(add) New group…": "$(add) 새 그룹…",
   "Add to which group?": "어느 그룹에 추가할까요?",
   "Blue": "파랑",

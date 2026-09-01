@@ -6,6 +6,12 @@ const CACHE_FILE_NAME = 'projects-cache.json';
 export interface CachedProject {
   name: string;
   uri: string;
+  /**
+   * Die Ebenen des Namens, damit der Baum auch aus dem Cache seine Form behält.
+   * Optional: Einträge aus einer älteren Fassung haben das Feld nicht und
+   * landen dann flach auf oberster Ebene.
+   */
+  parts?: string[];
 }
 
 type CacheData = Record<string, CachedProject[]>;
@@ -82,10 +88,18 @@ export class ProjectCache {
         if (!Array.isArray(entries)) {
           continue;
         }
-        data[groupName] = entries.filter(
-          (entry): entry is CachedProject =>
-            typeof entry?.name === 'string' && typeof entry?.uri === 'string'
-        );
+        data[groupName] = entries
+          .filter(
+            (entry): entry is CachedProject =>
+              typeof entry?.name === 'string' && typeof entry?.uri === 'string'
+          )
+          .map(entry => ({
+            ...entry,
+            parts:
+              Array.isArray(entry.parts) && entry.parts.every(part => typeof part === 'string')
+                ? entry.parts
+                : undefined
+          }));
       }
       return data;
     } catch {

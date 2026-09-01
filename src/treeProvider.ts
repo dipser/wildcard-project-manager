@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ProjectGroup, ProjectSettings, readGroups, readGroupsForWrite, writeGroups } from './config';
 import { ProjectCache } from './projectCache';
-import { ResolveResult, resolveGroup } from './projectResolver';
+import { ResolvedProject, ResolveResult, hasHardError, resolveGroup } from './projectResolver';
 import { sameUri } from './uri';
 
 // Interner Mime-Typ dieser View: "application/vnd.code.tree." + View-Id in
@@ -15,14 +15,42 @@ export class GroupNode {
 
 export class ProjectNode {
   readonly kind = 'project' as const;
+  /** Der Aufklapper darüber, falls das Muster über mehrere Ebenen geht. */
+  parent?: FolderNode;
   constructor(
+    /** Voller Name inklusive der übergeordneten Ebenen – für Meldungen und `hidden`. */
     public readonly name: string,
+    /** Was im Baum steht: bei mehreren Ebenen nur die unterste. */
+    public readonly label: string,
     public readonly uri: vscode.Uri,
     public readonly group: ProjectGroup,
     public readonly hidden: boolean,
     public readonly settings?: ProjectSettings,
     /** Aus dem Cache angezeigt, weil der Pfad gerade nicht lesbar ist. */
     public readonly stale = false
+  ) {}
+}
+
+/**
+ * Eine Zwischenebene eines mehrstufigen Musters: bei "/var/www/*" + zweitem
+ * Stern steht hier die Domain, darunter hängen ihre Unterverzeichnisse.
+ *
+ * Trägt `name` und `uri` wie ein Projekt, damit die vorhandenen Öffnen-Befehle
+ * unverändert auch auf einem Aufklapper funktionieren.
+ */
+export class FolderNode {
+  readonly kind = 'folder' as const;
+  parent?: FolderNode;
+  constructor(
+    /** Der Weg ab der ersten Wildcard ("domain.com", tiefer "domain.com/shop") – Schlüssel für `hidden`. */
+    public readonly name: string,
+    /** Was im Baum steht: nur dieses eine Verzeichnis. */
+    public readonly label: string,
+    public readonly uri: vscode.Uri,
+    public readonly group: ProjectGroup,
+    /** Alles darunter ist ausgeblendet – dann ist es der Ordner auch. */
+    public readonly hidden: boolean,
+    public readonly children: (ProjectNode | FolderNode)[]
   ) {}
 }
 
@@ -35,9 +63,97 @@ export class MessageNode {
   ) {}
 }
 
-export type Node = GroupNode | ProjectNode | MessageNode;
+export type Node = GroupNode | FolderNode | ProjectNode | MessageNode;
 
 const byOrder = (a: ProjectGroup, b: ProjectGroup): number => (a.order ?? 0) - (b.order ?? 0);
+
+/** Das auf Ebene `depth` getroffene Verzeichnis eines Projekts. */
+function folderUri(project: ResolvedProject, depth: number): vscode.Uri {
+  const up = project.parts.length - 1 - depth;
+  const segments = project.uri.path.split('/');
+  return project.uri.with({ path: segments.slice(0, segments.length - up).join('/') || '/' });
+}
+
+/**
+ * Aus der flachen Trefferliste den Baum bauen: Projekte aus einem Muster über
+ * mehrere Ebenen hängen unter einem Aufklapper je übergeordnetem Verzeichnis.
+ * Bei einstufigen Mustern hat jedes Projekt genau einen Namensteil – dann
+ * kommt die Schleife nie in den Ordnerzweig und alles bleibt flach wie bisher.
+ *
+ * Die Reihenfolge folgt der bereits sortierten Liste: ein Aufklapper steht an
+ * der Stelle seines ersten Treffers, seine Kinder in sich wieder sortiert.
+ */
+function buildNodes(
+  projects: ResolvedProject[],
+  group: ProjectGroup,
+  depth: number
+): (ProjectNode | FolderNode)[] {
+  const buckets = new Map<string, ResolvedProject[]>();
+  // Blätter und Ordnerschlüssel gemischt, damit die Reihenfolge erhalten bleibt.
+  const slots: (ResolvedProject | string)[] = [];
+
+  for (const project of projects) {
+    if (project.parts.length <= depth + 1) {
+      slots.push(project);
+      continue;
+    }
+    const key = project.parts[depth];
+    const bucket = buckets.get(key);
+    if (bucket) {
+      bucket.push(project);
+    } else {
+      buckets.set(key, [project]);
+      slots.push(key);
+    }
+  }
+
+  return slots.map(slot => {
+    if (typeof slot !== 'string') {
+      return new ProjectNode(
+        slot.name,
+        slot.label,
+        slot.uri,
+        group,
+        slot.hidden,
+        slot.settings,
+        slot.stale
+      );
+    }
+    const bucket = buckets.get(slot)!;
+    const children = buildNodes(bucket, group, depth + 1);
+    const folder = new FolderNode(
+      bucket[0].parts.slice(0, depth + 1).join('/'),
+      slot,
+      folderUri(bucket[0], depth),
+      group,
+      bucket.every(project => project.hidden),
+      children
+    );
+    for (const child of children) {
+      child.parent = folder;
+    }
+    return folder;
+  });
+}
+
+/** Den Projektknoten zu einer Uri im fertigen Baum suchen – samt Elternkette. */
+function findNode(
+  nodes: (ProjectNode | FolderNode)[],
+  uri: vscode.Uri
+): ProjectNode | undefined {
+  for (const node of nodes) {
+    const hit =
+      node.kind === 'project'
+        ? sameUri(node.uri, uri)
+          ? node
+          : undefined
+        : findNode(node.children, uri);
+    if (hit) {
+      return hit;
+    }
+  }
+  return undefined;
+}
 
 // Wartezeiten der automatischen Nachfassversuche nach dem Start.
 const RETRY_DELAYS = [1000, 3000, 6000, 10000];
@@ -230,8 +346,34 @@ export class PathProjectManagerProvider
       return item;
     }
 
+    if (node.kind === 'folder') {
+      // Bei aktivem Filter offen, sonst zu: bei dreißig Domains will niemand
+      // beim Öffnen der Seitenleiste alle Unterverzeichnisse auf einmal sehen.
+      const item = new vscode.TreeItem(
+        node.label,
+        this.filterQuery
+          ? vscode.TreeItemCollapsibleState.Expanded
+          : vscode.TreeItemCollapsibleState.Collapsed
+      );
+      // Eigenes Präfix: derselbe Ordner kann in derselben Gruppe zusätzlich als
+      // Projekt vorkommen, wenn ein zweiter Pfad ihn direkt trifft.
+      item.id = `folder ${node.group.name} ${node.uri.toString()}`;
+      item.contextValue = node.hidden ? 'folderHidden' : 'folder';
+      item.iconPath = new vscode.ThemeIcon(
+        'folder',
+        node.hidden ? new vscode.ThemeColor('disabledForeground') : undefined
+      );
+      if (node.hidden) {
+        item.description = vscode.l10n.t('hidden');
+      }
+      item.tooltip = node.uri.toString(true);
+      // Bewusst ohne item.command: der Knoten hat einen Aufklapp-Pfeil, und ein
+      // Klick soll eindeutig auf- und zuklappen. Öffnen geht über das Kontextmenü.
+      return item;
+    }
+
     if (node.kind === 'project') {
-      const item = new vscode.TreeItem(node.name, vscode.TreeItemCollapsibleState.None);
+      const item = new vscode.TreeItem(node.label, vscode.TreeItemCollapsibleState.None);
       // Stabile Id, damit treeView.reveal() den Eintrag wiederfindet.
       item.id = `${node.group.name} ${node.uri.toString()}`;
       item.contextValue = node.hidden ? 'projectHidden' : 'project';
@@ -267,7 +409,10 @@ export class PathProjectManagerProvider
   }
 
   getParent(node: Node): Node | undefined {
-    return node.kind === 'project' ? new GroupNode(node.group) : undefined;
+    if (node.kind !== 'project' && node.kind !== 'folder') {
+      return undefined;
+    }
+    return node.parent ?? new GroupNode(node.group);
   }
 
   async getChildren(node?: Node): Promise<Node[]> {
@@ -312,7 +457,7 @@ export class PathProjectManagerProvider
       // dem gefilterten Baum – und ihre eigene getChildren läuft dann nie, die
       // also auch nicht nachfassen würde. Deshalb hier.
       sorted.forEach((g, i) => {
-        if (resolved[i].errors.length > 0) {
+        if (hasHardError(resolved[i].errors)) {
           this.scheduleRetry(g.name);
         }
       });
@@ -343,10 +488,8 @@ export class PathProjectManagerProvider
         filtered = filtered.filter(p => matchesFilter(p.name, p.uri, this.filterQuery));
       }
 
-      const items: Node[] = filtered.map(
-        p => new ProjectNode(p.name, p.uri, node.group, p.hidden, p.settings, p.stale)
-      );
-      if (errors.length > 0) {
+      const items: Node[] = buildNodes(filtered, node.group, 0);
+      if (hasHardError(errors)) {
         this.scheduleRetry(node.group.name);
       } else {
         this.retries.delete(node.group.name);
@@ -363,6 +506,10 @@ export class PathProjectManagerProvider
       return items;
     }
 
+    if (node.kind === 'folder') {
+      return node.children;
+    }
+
     return [];
   }
 
@@ -371,11 +518,13 @@ export class PathProjectManagerProvider
     const groups = [...(await readGroups(this.context))].sort(byOrder);
     const resolved = await Promise.all(groups.map(g => this.resolve(g)));
     for (const [i, group] of groups.entries()) {
-      const hit = resolved[i].projects.find(
-        p => sameUri(p.uri, uri) && (!p.hidden || this.isShowingHidden(group))
-      );
+      // Bewusst über den gebauten Baum und nicht über die flache Liste: nur so
+      // hängt am Treffer die Elternkette, die treeView.reveal() braucht, um den
+      // Aufklapper darüber zu öffnen.
+      const visible = resolved[i].projects.filter(p => !p.hidden || this.isShowingHidden(group));
+      const hit = findNode(buildNodes(visible, group, 0), uri);
       if (hit) {
-        return new ProjectNode(hit.name, hit.uri, group, hit.hidden, hit.settings, hit.stale);
+        return hit;
       }
     }
     return undefined;
@@ -397,12 +546,7 @@ export class PathProjectManagerProvider
 
     // Abwurf auf ein Projekt zählt als Abwurf auf dessen Gruppe, auf leere
     // Fläche als "ans Ende".
-    const targetName =
-      target?.kind === 'group'
-        ? target.group.name
-        : target?.kind === 'project'
-          ? target.group.name
-          : undefined;
+    const targetName = target && target.kind !== 'message' ? target.group.name : undefined;
     if (targetName && names.includes(targetName)) {
       return;
     }

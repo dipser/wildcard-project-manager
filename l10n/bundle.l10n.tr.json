@@ -1,4 +1,5 @@
 {
+  "{0} subfolders could not be read and were skipped.": "{0} alt klasör okunamadı ve atlandı.",
   "$(add) New group…": "$(add) Yeni grup…",
   "Add to which group?": "Hangi gruba eklensin?",
   "Blue": "Mavi",

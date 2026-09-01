@@ -32,7 +32,7 @@ Verwalte **Pfade mit Wildcards**. Praktisch, wenn in einem Pfad mehrere Projekte
 
 ## Installation
 
-Aktuelle Version: **[wildcard-project-manager-1.0.2.vsix](https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/releases/wildcard-project-manager-1.0.2.vsix)**<br>
+Aktuelle Version: **[wildcard-project-manager-1.0.3.vsix](https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/releases/wildcard-project-manager-1.0.3.vsix)**<br>
 Ältere Versionen siehe [`releases/`](https://github.com/dipser/wildcard-project-manager/tree/develop/releases)
 
 In VSCode drücke `Strg`+`Shift`+`P` und wähle "`Extensions: Install from VSIX...`". Danach über `Strg`+`Shift`+`P` wähle "`Developer: Reload Window`".
@@ -40,15 +40,13 @@ In VSCode drücke `Strg`+`Shift`+`P` und wähle "`Extensions: Install from VSIX.
 
 ## Funktionsweise
 
-Statt einzelner Projekte definierst du **Gruppen**. Jede Gruppe hat einen Namen und eine Liste von Pfaden. Ein Pfad, der auf `*` endet, wird als Verzeichnis gescannt – jeder gefundene Unterordner wird automatisch zu einem Projekt in der Liste.
-
 ### JSON-Konfiguration `projects.json`
 
 ```json
 [
   {
     "name": "Remote Server",
-    "paths": ["vscode-remote://ssh-remote+externalserver/var/www/*"],
+    "paths": ["vscode-remote://ssh-remote+externalserver/var/www/*/*"],
     "hidden": [],
     "order": 1
   },
@@ -68,11 +66,11 @@ Statt einzelner Projekte definierst du **Gruppen**. Jede Gruppe hat einen Namen 
 | Feld | Beschreibung |
 |---|---|
 | `name` | Gruppenname in der Seitenleiste |
-| `paths` | Liste von URIs oder nackten Pfaden. Endet ein Pfad auf `*` (oder enthält `*`/`?` im letzten Segment), werden alle passenden Unterordner als Projekte aufgelistet. Ohne Wildcard wird der Pfad selbst als einzelnes Projekt eingetragen. |
-| `hidden` | Optional. Ordnernamen (auch mit `*`/`?`), die aus dem Scan-Ergebnis ausgeschlossen werden sollen |
+| `paths` | Liste von URIs oder nackten Pfaden. Ein `*` darf in jedem Segment stehen; alle passenden Unterordner werden als Projekte aufgelistet. Ohne Wildcard wird der Pfad selbst als einzelnes Projekt eingetragen. |
+| `hidden` | Optional. Ordnernamen (auch mit `*`), die aus dem Scan-Ergebnis ausgeschlossen werden sollen. Bei mehrstufigen Mustern darf ein Eintrag **jede Ebene** meinen: `domain.com` blendet den ganzen Aufklapper aus, `domain.com/logs` genau einen Eintrag, und das kurze `logs` jeden so heißenden Ordner unter jeder Domain. |
 | `order` | Optional. Umsortieren auch per Drag & Drop. |
 | `collapsed` | Optional. Gruppe startet auf- oder zugeklappt. |
-| `settings` | Optional. Einstellungen nach Ordnername (auch mit `*`/`?`): `icon-image` = [Codicon-ID](https://microsoft.github.io/vscode-codicons/dist/codicon.html), `icon-color` = [Theme-Farb-Id](https://code.visualstudio.com/api/references/theme-color). |
+| `settings` | Optional. Einstellungen nach Ordnername (auch mit `*`): `icon-image` = [Codicon-ID](https://microsoft.github.io/vscode-codicons/dist/codicon.html), `icon-color` = [Theme-Farb-Id](https://code.visualstudio.com/api/references/theme-color). |
 
 ### Lokale und Remote Pfad-Angaben:
 
@@ -85,10 +83,31 @@ Statt einzelner Projekte definierst du **Gruppen**. Jede Gruppe hat einen Namen 
 
 ### Wildcards
 
-Wildcards werden nur innerhalb **eines** Verzeichnisses ausgewertet.
+`*` steht für beliebig viele Zeichen und ist die einzige Wildcard. Ein `*` bleibt immer innerhalb **eines** Verzeichnisses – es überspringt nie eine Ebene. Dafür darf jedes Segment eines Pfades eine Wildcard enthalten, und der Pfad wird dann Ebene für Ebene abgelaufen.
 
-- `*` steht für beliebig viele Zeichen
-- `?` steht für genau ein Zeichen
+#### Mehrere Ebenen
+
+Typisch für Plesk-Server, wo unter jeder Domain ihre Subdomains liegen:
+
+```json
+{ "name": "Server", "paths": ["/var/www/*/*"], "hidden": ["logs", "conf", "httpdocs", ".*"] }
+```
+
+```
+▾ Server
+  ▾ domain1.com
+      sub1.domain1.com
+      sub2.domain1.com
+  ▸ domain2.com
+```
+
+Jede Wildcard-Ebene außer der letzten wird zu einem **Aufklapper**. Ein Klick darauf klappt nur auf und zu; das Verzeichnis selbst öffnest du über das Kontextmenü oder den Button `In neuem Fenster öffnen`. Aufklapper starten zugeklappt, danach merkt sich VS Code den Zustand.
+
+Der volle Projektname setzt sich aus allen Ebenen **ab der ersten Wildcard** zusammen (`domain1.com/sub1.domain1.com`) – das feste Präfix davor gehört nicht dazu, und im Baum steht ohnehin nur die unterste Ebene. Der volle Name ist der Schlüssel für `hidden` und `settings` und bleibt damit auch dann eindeutig, wenn zwei Domains dieselbe Unterseite haben.
+
+Ein Rechtsklick auf einen Aufklapper bietet `Projekt ausblenden` genau wie bei einem Projekt; in `hidden` landet dann sein eigener Weg (`domain2.com`) und damit alles darunter. Solange versteckte Einträge eingeblendet sind, steht so ein Aufklapper ausgegraut da und lässt sich über sein Kontextmenü wieder einblenden.
+
+Auch feste Segmente hinter einer Wildcard sind erlaubt: `/var/www/*/httpdocs` findet je Domain das Dokumentverzeichnis. Unterordner, die sich nicht lesen lassen – auf Plesk gehören etliche root – werden übersprungen und am Ende der Gruppe als Hinweis gezählt; die übrigen Domains bleiben davon unberührt.
 
 ### Cache `projects-cache.json`
 
@@ -127,7 +146,7 @@ Die Oberfläche ist standardmäßig englisch und richtet sich nach der Anzeigesp
 npm install
 npm run compile
 npm run package   # legt die .vsix im Ordner releases/ ab
-code --install-extension releases/wildcard-project-manager-1.0.2.vsix
+code --install-extension releases/wildcard-project-manager-1.0.3.vsix
 ```
 
 

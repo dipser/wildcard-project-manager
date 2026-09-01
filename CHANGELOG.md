@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.0.3
 
+- Wildcards may now appear in **any segment** of a path, not just the last one. `/var/www/*/*` walks two levels.
 - The user interface is now translated into all fourteen languages VS Code ships a language pack for: Chinese (Simplified), Chinese (Traditional), Czech, French, German, Hungarian, Italian, Japanese, Korean, Polish, Portuguese (Brazil), Russian, Spanish and Turkish.
 - New translation workflow: `npm run i18n:scan` collects everything outstanding into `l10n/_todo.json`, `npm run i18n:merge` writes it back. Fingerprints of the English source keep manual corrections intact as long as the original is unchanged; once it changes, the string is translated afresh. The rules live in `l10n/glossary.md`.
 

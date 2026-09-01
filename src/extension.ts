@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { GroupNode, PathProjectManagerProvider, ProjectNode } from './treeProvider';
+import { FolderNode, GroupNode, PathProjectManagerProvider, ProjectNode } from './treeProvider';
 import { CurrentProjectDecorationProvider } from './decorationProvider';
 import {
   ensureConfigFile,
@@ -245,7 +245,7 @@ export function activate(context: vscode.ExtensionContext): void {
       await vscode.window.showTextDocument(doc);
     }),
 
-    vscode.commands.registerCommand('pathProjectManager.openInCurrentWindow', async (node: ProjectNode) => {
+    vscode.commands.registerCommand('pathProjectManager.openInCurrentWindow', async (node: ProjectNode | FolderNode) => {
       const confirmed = await vscode.window.showInformationMessage(
         vscode.l10n.t('Switch to “{0}”?', node.name),
         { modal: true, detail: `${vscode.l10n.t('The current window will be replaced by the project.')}\n\n${node.uri.toString(true)}` },
@@ -257,7 +257,7 @@ export function activate(context: vscode.ExtensionContext): void {
       await vscode.commands.executeCommand('vscode.openFolder', node.uri, { forceNewWindow: false });
     }),
 
-    vscode.commands.registerCommand('pathProjectManager.openInNewWindow', (node: ProjectNode) => {
+    vscode.commands.registerCommand('pathProjectManager.openInNewWindow', (node: ProjectNode | FolderNode) => {
       vscode.commands.executeCommand('vscode.openFolder', node.uri, { forceNewWindow: true });
     }),
 
@@ -335,7 +335,7 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.window.showInformationMessage(vscode.l10n.t('Wildcard Project Manager: “{0}” added to “{1}”.', folder.name, group.name));
     }),
 
-    vscode.commands.registerCommand('pathProjectManager.hideProject', async (node: ProjectNode) => {
+    vscode.commands.registerCommand('pathProjectManager.hideProject', async (node: ProjectNode | FolderNode) => {
       if (!node) {
         return;
       }
@@ -384,7 +384,7 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
 
-    vscode.commands.registerCommand('pathProjectManager.unhideProject', async (node: ProjectNode) => {
+    vscode.commands.registerCommand('pathProjectManager.unhideProject', async (node: ProjectNode | FolderNode) => {
       if (!node) {
         return;
       }

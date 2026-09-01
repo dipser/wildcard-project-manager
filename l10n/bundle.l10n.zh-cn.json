@@ -1,4 +1,5 @@
 {
+  "{0} subfolders could not be read and were skipped.": "{0} 个子文件夹无法读取，已跳过。",
   "$(add) New group…": "$(add) 新建组…",
   "Add to which group?": "添加到哪个组？",
   "Blue": "蓝色",
