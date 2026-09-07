@@ -197,7 +197,7 @@ export function activate(context: vscode.ExtensionContext): void {
     provider.refresh();
   }
 
-  async function setIconColor(node: ProjectNode, colorId: string): Promise<void> {
+  async function setIconColor(node: ProjectNode | FolderNode, colorId: string): Promise<void> {
     if (!node) {
       return;
     }
@@ -440,7 +440,7 @@ export function activate(context: vscode.ExtensionContext): void {
       setGroupCollapsed(node, false)
     ),
 
-    vscode.commands.registerCommand('pathProjectManager.customizeIcon', async (node: ProjectNode) => {
+    vscode.commands.registerCommand('pathProjectManager.customizeIcon', async (node: ProjectNode | FolderNode) => {
       if (!node) {
         return;
       }
@@ -461,7 +461,7 @@ export function activate(context: vscode.ExtensionContext): void {
       await applySettings(node.group.name, node.name, current);
     }),
 
-    vscode.commands.registerCommand('pathProjectManager.resetIcon', async (node: ProjectNode) => {
+    vscode.commands.registerCommand('pathProjectManager.resetIcon', async (node: ProjectNode | FolderNode) => {
       if (!node) {
         return;
       }
@@ -497,14 +497,14 @@ export function activate(context: vscode.ExtensionContext): void {
 
   for (const { suffix, colorId } of COLOR_COMMANDS) {
     context.subscriptions.push(
-      vscode.commands.registerCommand(`pathProjectManager.setColor${suffix}`, (node: ProjectNode) =>
+      vscode.commands.registerCommand(`pathProjectManager.setColor${suffix}`, (node: ProjectNode | FolderNode) =>
         setIconColor(node, colorId)
       )
     );
   }
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('pathProjectManager.setColorMore', async (node: ProjectNode) => {
+    vscode.commands.registerCommand('pathProjectManager.setColorMore', async (node: ProjectNode | FolderNode) => {
       if (!node) {
         return;
       }
@@ -538,7 +538,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('pathProjectManager.setColorCustom', async (node: ProjectNode) => {
+    vscode.commands.registerCommand('pathProjectManager.setColorCustom', async (node: ProjectNode | FolderNode) => {
       if (!node) {
         return;
       }

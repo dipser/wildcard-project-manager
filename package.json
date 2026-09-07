@@ -293,7 +293,7 @@
         },
         {
           "submenu": "pathProjectManager.iconMenu",
-          "when": "view == pathProjectManagerView && viewItem =~ /^project/",
+          "when": "view == pathProjectManagerView && viewItem =~ /^(project|folder)/",
           "group": "7_modification@1"
         }
       ],

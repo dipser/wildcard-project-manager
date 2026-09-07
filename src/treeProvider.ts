@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ProjectGroup, ProjectSettings, readGroups, readGroupsForWrite, writeGroups } from './config';
 import { ProjectCache } from './projectCache';
-import { ResolvedProject, ResolveResult, hasHardError, resolveGroup } from './projectResolver';
+import { ResolvedProject, ResolveResult, findSettings, hasHardError, resolveGroup } from './projectResolver';
 import { sameUri } from './uri';
 
 // Interner Mime-Typ dieser View: "application/vnd.code.tree." + View-Id in
@@ -50,7 +50,8 @@ export class FolderNode {
     public readonly group: ProjectGroup,
     /** Alles darunter ist ausgeblendet – dann ist es der Ordner auch. */
     public readonly hidden: boolean,
-    public readonly children: (ProjectNode | FolderNode)[]
+    public readonly children: (ProjectNode | FolderNode)[],
+    public readonly settings?: ProjectSettings
   ) {}
 }
 
@@ -121,13 +122,17 @@ function buildNodes(
     }
     const bucket = buckets.get(slot)!;
     const children = buildNodes(bucket, group, depth + 1);
+    // Wie bei einem Projekt: erst der volle Weg ("domain.com/shop"), sonst der
+    // Ordnername allein – damit ein Muster jede Ebene meinen darf.
+    const name = bucket[0].parts.slice(0, depth + 1).join('/');
     const folder = new FolderNode(
-      bucket[0].parts.slice(0, depth + 1).join('/'),
+      name,
       slot,
       folderUri(bucket[0], depth),
       group,
       bucket.every(project => project.hidden),
-      children
+      children,
+      findSettings(group.settings, name) ?? findSettings(group.settings, slot)
     );
     for (const child of children) {
       child.parent = folder;
@@ -158,9 +163,16 @@ function findNode(
 // Wartezeiten der automatischen Nachfassversuche nach dem Start.
 const RETRY_DELAYS = [1000, 3000, 6000, 10000];
 
-function resolveIcon(node: ProjectNode): vscode.ThemeIcon {
+/**
+ * Icon und Farbe eines Eintrags. Aufklapper werden genauso behandelt wie
+ * Projekte – nur ist ihr Standard immer der Ordner, unabhängig davon, ob der
+ * Pfad lokal oder remote ist.
+ */
+function resolveIcon(node: ProjectNode | FolderNode): vscode.ThemeIcon {
   const settings = node.settings;
-  const iconId = settings?.['icon-image'] || (node.uri.scheme === 'file' ? 'folder' : 'remote-explorer');
+  const defaultIcon =
+    node.kind === 'folder' || node.uri.scheme === 'file' ? 'folder' : 'remote-explorer';
+  const iconId = settings?.['icon-image'] || defaultIcon;
   const colorId = settings?.['icon-color'] ?? (node.hidden ? 'disabledForeground' : undefined);
   return new vscode.ThemeIcon(iconId, colorId ? new vscode.ThemeColor(colorId) : undefined);
 }
@@ -359,10 +371,7 @@ export class PathProjectManagerProvider
       // Projekt vorkommen, wenn ein zweiter Pfad ihn direkt trifft.
       item.id = `folder ${node.group.name} ${node.uri.toString()}`;
       item.contextValue = node.hidden ? 'folderHidden' : 'folder';
-      item.iconPath = new vscode.ThemeIcon(
-        'folder',
-        node.hidden ? new vscode.ThemeColor('disabledForeground') : undefined
-      );
+      item.iconPath = resolveIcon(node);
       if (node.hidden) {
         item.description = vscode.l10n.t('hidden');
       }
