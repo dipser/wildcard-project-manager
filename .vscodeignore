@@ -9,6 +9,7 @@ releases/**
 node_modules/**
 !node_modules/**/LICENSE*
 README.de.md
+CONTRIBUTING.md
 scripts/**
 l10n/_todo.json
 l10n/glossary.md

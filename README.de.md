@@ -32,13 +32,17 @@ Verwalte **Pfade mit Wildcards**. Praktisch, wenn in einem Pfad mehrere Projekte
 
 ## Installation
 
-Aktuelle Version: **[wildcard-project-manager-1.0.3.vsix](https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/releases/wildcard-project-manager-1.0.3.vsix)**<br>
+[Download vom Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=dipser.wildcard-project-manager)<br>
+[Download von Open VSX](https://open-vsx.org/extension/dipser/wildcard-project-manager)<br>
+[Download aus dem Git-Repository](https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/releases/wildcard-project-manager-1.0.4.vsix)<br>
 Ältere Versionen siehe [`releases/`](https://github.com/dipser/wildcard-project-manager/tree/develop/releases)
 
-In VSCode drücke `Strg`+`Shift`+`P` und wähle "`Extensions: Install from VSIX...`". Danach über `Strg`+`Shift`+`P` wähle "`Developer: Reload Window`".
+Manuelle Installation: In VS Code `Strg`+`Shift`+`P` drücken und "`Extensions: Install from VSIX...`" wählen. Danach erneut `Strg`+`Shift`+`P` und "`Developer: Reload Window`".
 
 
 ## Funktionsweise
+
+Statt einzelne Projekte aufzulisten definierst du **Gruppen**. Jede Gruppe hat einen Namen und eine Liste von Pfaden. Ein Pfad, der auf `*` endet, wird als Verzeichnis eingelesen – jeder gefundene Unterordner wird automatisch zu einem Projekt in der Liste. Wildcards dürfen in jedem Segment stehen: `/var/www/*/*` läuft zwei Ebenen ab und legt die Treffer unter je einem Aufklapper pro übergeordnetem Ordner ab.
 
 ### JSON-Konfiguration `projects.json`
 
@@ -83,7 +87,7 @@ In VSCode drücke `Strg`+`Shift`+`P` und wähle "`Extensions: Install from VSIX.
 
 ### Wildcards
 
-`*` steht für beliebig viele Zeichen und ist die einzige Wildcard. Ein `*` bleibt immer innerhalb **eines** Verzeichnisses – es überspringt nie eine Ebene. Dafür darf jedes Segment eines Pfades eine Wildcard enthalten, und der Pfad wird dann Ebene für Ebene abgelaufen.
+`*` steht für beliebig viele Zeichen und ist die einzige Wildcard. Sie überspringt nie eine Ebene, darf dafür aber in jedem Segment stehen – der Pfad wird dann Ebene für Ebene abgelaufen.
 
 #### Mehrere Ebenen
 
@@ -101,13 +105,10 @@ Typisch für Plesk-Server, wo unter jeder Domain ihre Subdomains liegen:
   ▸ domain2.com
 ```
 
-Jede Wildcard-Ebene außer der letzten wird zu einem **Aufklapper**. Ein Klick darauf klappt nur auf und zu; das Verzeichnis selbst öffnest du über das Kontextmenü oder den Button `In neuem Fenster öffnen`. Aufklapper starten zugeklappt, danach merkt sich VS Code den Zustand.
-
-Der volle Projektname setzt sich aus allen Ebenen **ab der ersten Wildcard** zusammen (`domain1.com/sub1.domain1.com`) – das feste Präfix davor gehört nicht dazu, und im Baum steht ohnehin nur die unterste Ebene. Der volle Name ist der Schlüssel für `hidden` und `settings` und bleibt damit auch dann eindeutig, wenn zwei Domains dieselbe Unterseite haben.
-
-Ein Rechtsklick auf einen Aufklapper bietet `Projekt ausblenden` genau wie bei einem Projekt; in `hidden` landet dann sein eigener Weg (`domain2.com`) und damit alles darunter. Solange versteckte Einträge eingeblendet sind, steht so ein Aufklapper ausgegraut da und lässt sich über sein Kontextmenü wieder einblenden.
-
-Auch feste Segmente hinter einer Wildcard sind erlaubt: `/var/www/*/httpdocs` findet je Domain das Dokumentverzeichnis. Unterordner, die sich nicht lesen lassen – auf Plesk gehören etliche root – werden übersprungen und am Ende der Gruppe als Hinweis gezählt; die übrigen Domains bleiben davon unberührt.
+- **Aufklapper**: jede Wildcard-Ebene außer der letzten. Ein Klick klappt nur auf und zu, das Verzeichnis öffnest du über das Kontextmenü. `Projekt ausblenden` darauf versteckt alles darunter.
+- **Projektname**: alle Ebenen ab der ersten Wildcard (`domain1.com/sub1.domain1.com`) – der Schlüssel für `hidden` und `settings`, eindeutig auch wenn zwei Domains dieselbe Unterseite haben.
+- **Feste Segmente** hinter einer Wildcard sind erlaubt: `/var/www/*/httpdocs` findet je Domain das Dokumentverzeichnis.
+- **Unlesbare Ordner** werden übersprungen und am Ende der Gruppe als Hinweis gezählt.
 
 ### Cache `projects-cache.json`
 
@@ -116,38 +117,46 @@ Es wird ein **Cache** bei jedem fehlerfreien Ladevorgang aktualisiert.
 
 ### Features
 
-- **Seitenleiste öffnen**: Klick auf das Path-Project-Manager-Icon in der Activity Bar.
-- **Konfiguration bearbeiten**: Zahnrad-Icon oben in der View, oder Befehl `Wildcard Project Manager: Konfiguration bearbeiten`. Die Datei liegt im globalen Storage der Extension und wird beim ersten Aufruf mit einem Beispiel angelegt.
-- **Projekt öffnen**: Klick auf einen Eintrag fragt nach und öffnet ihn dann im aktuellen Fenster. Beim ersten Öffnen der Seitenleiste wird das aktuell geöffnete Projekt automatisch angesteuert und ausgewählt.
-- **In neuem Fenster öffnen**: Kontextmenü / Inline-Aktion am Eintrag – ohne Rückfrage.
-- **Projekt ausblenden**: Rechtsklick auf ein Projekt → `Projekt ausblenden`. Der Name wandert in die `hidden`-Liste der Gruppe; die Meldung danach bietet `Rückgängig` an.
-- **Versteckte ein-/ausblenden**: Auge-Symbol an der Gruppe (erscheint beim Überfahren mit der Maus, nur wenn die Gruppe überhaupt `hidden`-Einträge hat). Solange versteckte Projekte sichtbar sind, steht `versteckte sichtbar` neben dem Gruppennamen und die betroffenen Einträge sind mit `ausgeblendet` markiert und ausgegraut. Rechtsklick auf so einen Eintrag → `Projekt einblenden` entfernt ihn dauerhaft aus `hidden`.
-- **Gruppen umsortieren**: Gruppen per Drag & Drop verschieben – das schreibt `order` neu. Projekte lassen sich nicht ziehen, sie ergeben sich aus den Pfad-Mustern.
-- **Gruppe standardmäßig zuklappen**: Rechtsklick auf eine Gruppe → `Gruppe standardmäßig zuklappen` (bzw. `… aufklappen`). Das setzt das Feld `collapsed` in der Konfiguration.
-- **Icon anpassen**: Rechtsklick auf ein Projekt → `Icon`. Darin zuerst `Icon Farbe` als Untermenü: acht gängige Farben direkt anklickbar, `Weitere Farben…` für die vollständige Palette mit echter Farbvorschau und `Eigene Farb-Id…` für jede beliebige [Theme-Farbe](https://code.visualstudio.com/api/references/theme-color). Die Emoji im Menü sind nur Näherungen — Menüs können keine echten Icons rendern, Listen schon, danach `Icon wechseln…` für die Icon-Liste und `Icon zurücksetzen`. Die Icon-Liste zeigt rund 90 Codicons gruppiert und in der eingestellten Farbe gerendert, Tippen filtert; über `Eigene Codicon-ID…` ist jede ID aus der [offiziellen Übersicht](https://microsoft.github.io/vscode-codicons/dist/codicon.html) erreichbar. Alles landet unter `settings` in der Gruppe (`icon-image` und `icon-color`).
-
-  Das Icon bleibt bewusst eine Liste statt eines Untermenüs: VS Code liest Menüs statisch aus `package.json`, jeder Eintrag braucht einen eigenen Befehl. Bei acht Farben lohnt sich das, bei 90 Icons nicht.
-- **Projekt suchen**: Lupe oben in der View filtert Gruppen und Projekte nach Name oder Pfad; das Filter-Symbol daneben setzt den Filter zurück.
-- **Cache**: Nach jedem fehlerfreien Laden schreibt die Extension die gefundenen Projekte nach `projects-cache.json` neben die Konfiguration. Ist ein Pfad später nicht erreichbar, zeigt die Gruppe diesen Stand statt einer leeren Liste – markiert mit `aus dem Cache`. Die Datei darf jederzeit gelöscht werden.
-- **Aktualisieren**: Refresh-Icon oben in der View, nötig z. B. wenn du remote neue Ordner angelegt hast (die Konfigurationsdatei selbst wird beim Speichern automatisch neu geladen).
-
+- **Seitenleiste**: das Wildcard-Project-Manager-Icon in der Activity Bar.
+- **Konfiguration**: Zahnrad-Icon in der View, oder `Wildcard Project Manager: Konfiguration bearbeiten`. Die Datei liegt im globalen Storage der Extension.
+- **Öffnen**: Klick auf einen Eintrag, Rückfrage, dann im aktuellen Fenster.
+- **Neues Fenster**: Kontextmenü oder Inline-Aktion, ohne Rückfrage.
+- **Ausblenden**: Rechtsklick → `Projekt ausblenden`, die Meldung bietet `Rückgängig`.
+- **Versteckte zeigen**: Auge-Symbol an der Gruppe; `Projekt einblenden` holt einen Eintrag wieder aus `hidden`.
+- **Sortierung**: Gruppen per Drag & Drop, das schreibt `order` neu. Projekte ergeben sich aus den Mustern.
+- **Zuklappen**: Rechtsklick auf eine Gruppe → `Gruppe standardmäßig zuklappen`, gespeichert als `collapsed`.
+- **Icon**: Rechtsklick auf Projekt oder Ordner → `Icon` für [Farbe](https://code.visualstudio.com/api/references/theme-color) und [Codicon](https://microsoft.github.io/vscode-codicons/dist/codicon.html), gespeichert unter `settings`.
+- **Suche**: Lupe in der View filtert Gruppen und Projekte nach Name oder Pfad.
+- **Cache**: Ein nicht erreichbarer Pfad fällt auf `projects-cache.json` zurück, markiert mit `aus dem Cache`.
+- **Aktualisieren**: Refresh-Icon, für anderswo angelegte Ordner. Die Konfiguration selbst wird beim Speichern neu geladen.
 
 
 ## Sprachen
 
-Die Oberfläche ist standardmäßig englisch und richtet sich nach der Anzeigesprache von VS Code. Sie ist in alle vierzehn Sprachen übersetzt, für die VS Code ein Language Pack anbietet: Chinesisch (vereinfacht), Chinesisch (traditionell), Deutsch, Französisch, Italienisch, Japanisch, Koreanisch, Polnisch, Portugiesisch (Brasilien), Russisch, Spanisch, Tschechisch, Türkisch und Ungarisch. Diese Dokumentation liegt auf Englisch und Deutsch vor.
+Die Oberfläche richtet sich nach der Anzeigesprache von VS Code. Neben Englisch deckt sie alle vierzehn Sprachen ab, für die VS Code ein Language Pack anbietet:
+
+- Chinesisch (vereinfacht)
+- Chinesisch (traditionell)
+- Deutsch
+- Englisch (Standard)
+- Französisch
+- Italienisch
+- Japanisch
+- Koreanisch
+- Polnisch
+- Portugiesisch (Brasilien)
+- Russisch
+- Spanisch
+- Tschechisch
+- Türkisch
+- Ungarisch
+
+Diese Dokumentation liegt auf Englisch und Deutsch vor.
 
 
-## Entwicklung & Testen
+## Entwicklung
 
-### Build
-
-```bash
-npm install
-npm run compile
-npm run package   # legt die .vsix im Ordner releases/ ab
-code --install-extension releases/wildcard-project-manager-1.0.3.vsix
-```
+Build, Start im Extension Development Host, der Übersetzungs-Workflow und die Release-Schritte stehen in [CONTRIBUTING.md](https://github.com/dipser/wildcard-project-manager/blob/develop/CONTRIBUTING.md) (englisch).
 
 
 ## Lizenz

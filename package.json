@@ -2,7 +2,7 @@
   "name": "wildcard-project-manager",
   "displayName": "Wildcard Project Manager",
   "description": "%extension.description%",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "dipser",
   "license": "MIT",
   "repository": {

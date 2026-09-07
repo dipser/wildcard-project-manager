@@ -1,26 +1,16 @@
-<p align="center">
+<!-- <p>
   <img src="https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/icons/marketplace-icon.png" alt="Wildcard Project Manager" width="128">
-</p>
+</p> -->
 
-<p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=dipser.wildcard-project-manager">
-    <img src="https://img.shields.io/badge/VS%20Code-Marketplace-007ACC?style=flat" alt="VS Code Marketplace" />
-  </a>
-  <a href="https://open-vsx.org/extension/dipser/wildcard-project-manager">
-    <img src="https://img.shields.io/open-vsx/v/dipser/wildcard-project-manager?label=Open%20VSX&style=flat&color=007ACC&logo=open-vsx" alt="Open VSX Version" />
-  </a>
-  <a href="https://github.com/dipser/wildcard-project-manager/blob/develop/LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License: MIT" />
-  </a>
-  <a href="https://github.com/dipser/wildcard-project-manager/stargazers">
-    <img src="https://img.shields.io/github/stars/dipser/wildcard-project-manager.svg?style=flat&logo=github" alt="GitHub stars" />
-  </a>
-  <a href="https://github.com/dipser/wildcard-project-manager/issues">
-    <img src="https://img.shields.io/github/issues/dipser/wildcard-project-manager.svg?style=flat&logo=github" alt="GitHub issues" />
-  </a>
-</p>
+# <img src="https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/icons/marketplace-icon.png" alt="Wildcard Project Manager" width="26"> Wildcard Project Manager 1.0.4
 
-# Wildcard Project Manager
+
+[![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-007ACC?style=flat)](https://marketplace.visualstudio.com/items?itemName=dipser.wildcard-project-manager)
+[![Open VSX Version](https://img.shields.io/open-vsx/v/dipser/wildcard-project-manager?label=Open%20VSX&style=flat&color=007ACC&logo=open-vsx)](https://open-vsx.org/extension/dipser/wildcard-project-manager)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/dipser/wildcard-project-manager/blob/develop/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/dipser/wildcard-project-manager.svg?style=flat&logo=github)](https://github.com/dipser/wildcard-project-manager/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/dipser/wildcard-project-manager.svg?style=flat&logo=github)](https://github.com/dipser/wildcard-project-manager/issues)
+
 
 **English** · [Deutsch](https://github.com/dipser/wildcard-project-manager/blob/develop/README.de.md)
 
@@ -32,10 +22,12 @@ Manage **paths with wildcards**. Handy when a single path holds several projects
 
 ## Installation
 
-Current version: **[wildcard-project-manager-1.0.3.vsix](https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/releases/wildcard-project-manager-1.0.3.vsix)**<br>
-For older versions see [`releases/`](https://github.com/dipser/wildcard-project-manager/tree/develop/releases)
+[Download from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=dipser.wildcard-project-manager)<br>
+[Download from Open VSX](https://open-vsx.org/extension/dipser/wildcard-project-manager)<br>
+[Download from Git-Repository](https://raw.githubusercontent.com/dipser/wildcard-project-manager/develop/releases/wildcard-project-manager-1.0.4.vsix)<br>
+Older versions in [`releases/`](https://github.com/dipser/wildcard-project-manager/tree/develop/releases)
 
-In VS Code press `Ctrl`+`Shift`+`P` and choose "`Extensions: Install from VSIX...`". Then press `Ctrl`+`Shift`+`P` again and choose "`Developer: Reload Window`".
+Manual Install: In VS Code press `Ctrl`+`Shift`+`P` and choose "`Extensions: Install from VSIX...`". Then press `Ctrl`+`Shift`+`P` again and choose "`Developer: Reload Window`".
 
 
 ## How it works
@@ -85,7 +77,7 @@ Instead of listing individual projects you define **groups**. Each group has a n
 
 ### Wildcards
 
-`*` matches any number of characters and is the only wildcard. A `*` always stays within **one** directory – it never skips a level. In exchange every segment of a path may carry a wildcard, and the path is then walked level by level.
+`*` matches any number of characters and is the only wildcard. It never crosses a directory level, but may sit in every segment – the path is then walked level by level.
 
 #### Several levels
 
@@ -103,13 +95,10 @@ Typical for Plesk servers, where each domain holds its subdomains:
   ▸ domain2.com
 ```
 
-Every wildcard level except the last becomes an **expandable node**. Clicking it only expands and collapses; the directory itself opens from the context menu or the `Open in New Window` button. Expandable nodes start collapsed, after which VS Code remembers their state.
-
-The full project name is composed of every level **from the first wildcard onwards** (`domain1.com/sub1.domain1.com`) – the fixed prefix before it is not part of the name, and the tree shows only the last level anyway. That full name is the key for `hidden` and `settings`, so it stays unambiguous even when two domains share a subdirectory name.
-
-Right-clicking an expandable node offers `Hide Project` just like a project does; the entry written to `hidden` is then the node's own path (`domain2.com`), which hides everything below it. While hidden entries are shown, such a node appears greyed out and can be brought back from its context menu.
-
-Fixed segments after a wildcard work too: `/var/www/*/httpdocs` finds the document root of every domain. Subdirectories that cannot be read – on Plesk quite a few belong to root – are skipped and counted as a note at the end of the group; the remaining domains are unaffected.
+- **Expandable node**: every wildcard level except the last. Clicking only expands and collapses, the directory opens from the context menu. `Hide Project` on it hides everything below.
+- **Project name**: every level from the first wildcard onwards (`domain1.com/sub1.domain1.com`) – the key for `hidden` and `settings`, and unambiguous when two domains share a subdirectory name.
+- **Fixed segments** after a wildcard work too: `/var/www/*/httpdocs` finds the document root of every domain.
+- **Unreadable directories** are skipped and counted as a note at the end of the group.
 
 ### Cache `projects-cache.json`
 
@@ -118,39 +107,44 @@ The **cache** is refreshed on every successful load.
 
 ### Features
 
-- **Open the sidebar**: click the Wildcard Project Manager icon in the activity bar.
-- **Edit the configuration**: gear icon at the top of the view, or the command `Wildcard Project Manager: Edit Configuration`. The file lives in the extension's global storage and is created with an example on first use.
-- **Open a project**: clicking an entry asks for confirmation and then opens it in the current window. When the sidebar is opened for the first time, the currently open project is revealed and selected automatically.
-- **Open in a new window**: context menu / inline action on the entry – without a confirmation prompt.
-- **Hide a project**: right-click a project → `Hide Project`. The name moves into the group's `hidden` list; the message afterwards offers `Undo`.
-- **Show/hide hidden entries**: eye icon on the group (appears on hover, and only if the group has any `hidden` entries at all). While hidden projects are visible, `showing hidden` appears next to the group name and the affected entries are marked `hidden` and greyed out. Right-click such an entry → `Show Project` removes it from `hidden` permanently.
-- **Reorder groups**: drag & drop groups – this rewrites `order`. Projects cannot be dragged, they follow from the path patterns.
-- **Collapse a group by default**: right-click a group → `Collapse Group by Default` (or `… Expand …`). This sets the `collapsed` field in the configuration.
-- **Customize the icon**: right-click a project → `Icon`. First `Icon Color` as a submenu: eight common colors directly selectable, `More Colors…` for the full palette with a real color preview, and `Custom Color ID…` for any [theme color](https://code.visualstudio.com/api/references/theme-color). The emoji in the menu are only approximations — menus cannot render real icons, lists can. Then `Change Icon…` for the icon list and `Reset Icon`. The icon list shows around 90 codicons, grouped and rendered in the configured color; typing filters them. `Custom codicon ID…` gives access to any ID from the [official overview](https://microsoft.github.io/vscode-codicons/dist/codicon.html). Everything is stored under `settings` in the group (`icon-image` and `icon-color`).
-
-  The icon deliberately stays a list rather than a submenu: VS Code reads menus statically from `package.json`, and every entry needs its own command. That pays off for eight colors, but not for 90 icons.
-- **Find a project**: the magnifier at the top of the view filters groups and projects by name or path; the filter icon next to it clears the filter.
-- **Cache**: after every successful load the extension writes the projects it found to `projects-cache.json` next to the configuration. If a path becomes unreachable later, the group shows that state instead of an empty list – marked `from cache`. The file may be deleted at any time.
-- **Refresh**: refresh icon at the top of the view, needed for example after creating new directories remotely (the configuration file itself is reloaded automatically on save).
+- **Sidebar**: the Wildcard Project Manager icon in the activity bar.
+- **Configuration**: gear icon in the view, or `Wildcard Project Manager: Edit Configuration`. The file sits in the extension's global storage.
+- **Open**: click an entry, confirm, opens in the current window.
+- **New window**: context menu or inline action, without a prompt.
+- **Hide**: right-click → `Hide Project`, the message offers `Undo`.
+- **Show hidden**: eye icon on the group; `Show Project` takes an entry out of `hidden` again.
+- **Order**: drag & drop groups, which rewrites `order`. Projects follow from the patterns.
+- **Collapsed**: right-click a group → `Collapse Group by Default`, stored as `collapsed`.
+- **Icon**: right-click a project or folder → `Icon` for [colour](https://code.visualstudio.com/api/references/theme-color) and [codicon](https://microsoft.github.io/vscode-codicons/dist/codicon.html), stored under `settings`.
+- **Search**: magnifier in the view filters groups and projects by name or path.
+- **Cache**: an unreachable path falls back to `projects-cache.json`, marked `from cache`.
+- **Refresh**: refresh icon, for directories created elsewhere. The configuration itself reloads on save.
 
 
-## Language
+## Languages
 
-The user interface is English by default and follows VS Code's display language. It is translated into all fourteen languages VS Code ships a language pack for: Chinese (Simplified), Chinese (Traditional), Czech, French, German, Hungarian, Italian, Japanese, Korean, Polish, Portuguese (Brazil), Russian, Spanish and Turkish. This documentation exists in English and German.
+- Chinese (Simplified)
+- Chinese (Traditional)
+- Czech
+- **English** (default)
+- French
+- German
+- Hungarian
+- Italian
+- Japanese
+- Korean
+- Polish
+- Portuguese (Brazil)
+- Russian
+- Spanish
+- Turkish
 
 
-## Development & testing
+## Development
 
-### Build
-
-```bash
-npm install
-npm run compile
-npm run package   # writes the .vsix into releases/
-code --install-extension releases/wildcard-project-manager-1.0.3.vsix
-```
+Building, running the extension in the Extension Development Host, the translation workflow and the release steps are described in [CONTRIBUTING.md](https://github.com/dipser/wildcard-project-manager/blob/develop/CONTRIBUTING.md).
 
 
 ## License
 
-MIT
+[MIT](https://github.com/dipser/wildcard-project-manager/blob/develop/LICENSE)
